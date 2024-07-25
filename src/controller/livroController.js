@@ -1,11 +1,12 @@
-import livro from "../models/Livro.js";
-import { autor } from "../models/Autor.js";
+import { livro } from "../models/index.js";
+import { autor } from "../models/index.js";
 
 class LivroController {
   static async listarLivros(req, res, next) {
     try {
-      const listaLivros = await livro.find({});
-      res.status(200).json(listaLivros);
+      const buscaLivros = livro.find();
+      req.resultado = buscaLivros;
+      next();
     } catch (erro) {
       next(erro);
     }
@@ -52,11 +53,15 @@ class LivroController {
       next(erro);
     }
   }
-  static async listarLivrosPorEditora(req, res, next) {
-    const editora = req.query.editora;
+  static async listarLivrosPorFiltro(req, res, next) {
+    const { editora, titulo } = req.query;
+    const busca = {};
+    if (editora) busca.editora = editora;
+    if (titulo) busca.titulo = { $regex: titulo, $options: "i" };
     try {
-      const livrosPorEditora = await livro.find({ editora: editora });
-      res.status(200).json(livrosPorEditora);
+      const livrosPorEditora = livro.find(busca);
+      req.resultado = livrosPorEditora;
+      next();
     } catch (erro) {
       next(erro);
     }
